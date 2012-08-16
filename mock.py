@@ -80,10 +80,10 @@ class MockServer(Resource):
 
     def __init__(self, port):
         self.port = port
-        logger.info("Started mock server on port {0}".format(self.port))
+        logger.info('Started mock server on port {0}'.format(self.port))
 
     def __del__(self):
-        logger.info("Stopped mock server on port {0}".format(self.port))
+        logger.info('Stopped mock server on port {0}'.format(self.port))
 
     def render_GET(self, request):
         return self.handle_request('GET', request)
@@ -112,10 +112,10 @@ class SmartServer(Resource):
     isLeaf = True
 
     def __init__(self):
-        logger.info("Started smart server on port 8080")
+        logger.info('Started smart server on port 8080')
 
     def __del__(self):
-        logger.info("Stopped smart server on port 8080")
+        logger.info('Stopped smart server on port 8080')
 
     def render_POST(self, request):
         try:
@@ -125,9 +125,9 @@ class SmartServer(Resource):
                 'response_code': int(request.args['response_code'][0]),
                 'response_body': request.args['response_body'][0]
             }
-            response = "Success"
+            response = 'Success'
         except KeyError, key:
-            response = "Missing key: {0}".format(key)
+            response = 'Missing key: {0}'.format(key)
             logger.error(response)
         finally:
             return response
@@ -143,8 +143,8 @@ class Runner(object):
 
     def parse_args(self):
         """Parse command line options"""
-        usage = "usage: %prog [options]\n\n" +\
-                "Example: %prog --nodes=4"
+        usage = 'usage: %prog [options]\n\n' +\
+                'Example: %prog --nodes=4'
         parser = OptionParser(usage)
         parser.add_option('-n', '--nodes', default=1, type='int', dest='nodes',
                           help='Number of nodes', metavar='nodes')
