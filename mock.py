@@ -16,10 +16,16 @@
 #
 
 from collections import defaultdict
+import logging
+import logging.config
 
 from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.resource import Resource
+
+
+logging.config.fileConfig('logging.conf')
+logger = logging.getLogger('root')
 
 
 class MockServer(Resource):
@@ -27,6 +33,10 @@ class MockServer(Resource):
 
     def __init__(self):
         self.dispatcher = defaultdict(dict)
+        logger.info("Started mock server")
+
+    def __del__(self):
+        logger.info("Stopped mock server")
 
     def render_GET(self, request):
         return self.handle_request('GET', request)
@@ -58,6 +68,10 @@ class SmartServer(Resource):
 
     def __init__(self, mock_server):
         self.mock_server = mock_server
+        logger.info("Started smart server")
+
+    def __del__(self):
+        logger.info("Stopped smart server")
 
     def render_POST(self, request):
         try:
