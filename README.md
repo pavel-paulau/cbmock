@@ -12,7 +12,11 @@ Dependencies
 Example
 -------
 
+First of all start mock server
+
     > ./mock.py
+
+Learn server to handle GET requests
 
     > curl 127.0.0.1:8091/test
     > Not found: '/test'
@@ -21,6 +25,14 @@ Example
     > Success
 
     > curl 127.0.0.1:8091/test
+    > 4
+
+Learn server to handle parameterized POST requests
+
+    > curl -d "path=/test&method=POST&response_code=200&response_body={param1}*{param2}" 127.0.0.1:8080
+    > Success
+
+    > curl -d "{param1}=2&{param2}=2" 127.0.0.1:8091/test
     > 4
 
 Testing
