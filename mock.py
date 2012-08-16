@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2012, Couchbase, Inc.
 # All Rights Reserved

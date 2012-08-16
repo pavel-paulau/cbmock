@@ -12,7 +12,7 @@ Dependencies
 Example
 -------
 
-    > python mock.py
+    > ./mock.py
 
     > curl 127.0.0.1:8091/test
     > Not found: '/test'
