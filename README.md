@@ -22,3 +22,12 @@ Example
 
     > curl 127.0.0.1:8091/test
     > 4
+
+Testing
+-------
+
+    pip install lettuce
+    pip install nose
+    pip install requests
+
+    > lettuce
