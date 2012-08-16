@@ -19,6 +19,7 @@
 from collections import defaultdict
 import logging
 import logging.config
+from optparse import OptionParser
 
 from twisted.internet import reactor
 from twisted.web.server import Site
@@ -75,13 +76,14 @@ class HttpResponse(object):
 
 class MockServer(Resource):
     isLeaf = True
+    dispatcher = defaultdict(dict)
 
-    def __init__(self):
-        self.dispatcher = defaultdict(dict)
-        logger.info("Started mock server")
+    def __init__(self, port):
+        self.port = port
+        logger.info("Started mock server on port {0}".format(self.port))
 
     def __del__(self):
-        logger.info("Stopped mock server")
+        logger.info("Stopped mock server on port {0}".format(self.port))
 
     def render_GET(self, request):
         return self.handle_request('GET', request)
@@ -94,7 +96,7 @@ class MockServer(Resource):
 
     def handle_request(self, method, request):
         try:
-            raw_data = self.dispatcher[method][request.path]
+            raw_data = MockServer.dispatcher[method][request.path]
         except KeyError, key:
             request.setResponseCode(404)
             response = 'Not found: {0}'.format(key)
@@ -109,18 +111,17 @@ class MockServer(Resource):
 class SmartServer(Resource):
     isLeaf = True
 
-    def __init__(self, mock_server):
-        self.mock_server = mock_server
-        logger.info("Started smart server")
+    def __init__(self):
+        logger.info("Started smart server on port 8080")
 
     def __del__(self):
-        logger.info("Stopped smart server")
+        logger.info("Stopped smart server on port 8080")
 
     def render_POST(self, request):
         try:
             method = request.args['method'][0]
             path = request.args['path'][0]
-            self.mock_server.dispatcher[method][path] = {
+            MockServer.dispatcher[method][path] = {
                 'response_code': int(request.args['response_code'][0]),
                 'response_body': request.args['response_body'][0]
             }
@@ -132,16 +133,51 @@ class SmartServer(Resource):
             return response
 
 
-def main():
-    mock_server = MockServer()
-    factory = Site(mock_server)
-    reactor.listenTCP(8091, factory)
+class Runner(object):
 
-    smart_server = SmartServer(mock_server)
-    factory = Site(smart_server)
-    reactor.listenTCP(8080, factory)
+    def __init__(self, num_nodes):
+        if num_nodes:
+            self.num_nodes = int(num_nodes)
+        else:
+            self.parse_args()
 
-    reactor.run()
+    def parse_args(self):
+        """Parse command line options"""
+        usage = "usage: %prog [options]\n\n" +\
+                "Example: %prog --nodes=4"
+        parser = OptionParser(usage)
+        parser.add_option('-n', '--nodes', default=1, type='int', dest='nodes',
+                          help='Number of nodes', metavar='nodes')
+
+        options, args = parser.parse_args()
+        self.num_nodes = options.nodes
+
+    def start_mock_cluster(self):
+        """Start multi-node mock cluster"""
+        for port in range(9001, 9001 + self.num_nodes):
+            mock_server = MockServer(port=port)
+            factory = Site(mock_server)
+            reactor.listenTCP(port, factory)
+
+    def start_smart_server(self):
+        """Start common smart server"""
+        smart_server = SmartServer()
+        factory = Site(smart_server)
+        reactor.listenTCP(8080, factory)
+
+        reactor.run()
+
+    def stop(self):
+        reactor.run()
+
+
+def main(num_nodes=None):
+    try:
+        runner = Runner(num_nodes)
+        runner.start_mock_cluster()
+        runner.start_smart_server()
+    except KeyboardInterrupt:
+        runner.stop()
 
 
 if __name__ == "__main__":
