@@ -79,8 +79,8 @@ def define_request_logic(step, method, path, code, script):
     }
 
 
-@step(r'When I learn mock to handle this request')
-def learn_mock_server(step):
+@step(r'When I train mock to handle this request')
+def train_mock_server(step):
     port = world.config.get('servers', 'smart_port')
     url = get_url(port=port, path='/')
     requests.post(url, data=world.request_params)

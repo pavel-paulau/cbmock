@@ -16,7 +16,7 @@ First of all start mock server
 
     > ./mock.py
 
-Learn server to handle GET requests
+Train server to handle GET requests
 
     > curl 127.0.0.1:9001/test
     > Not found: '/test'
@@ -27,7 +27,7 @@ Learn server to handle GET requests
     > curl 127.0.0.1:9001/test
     > 4
 
-Learn server to handle parameterized POST requests
+Train server to handle parameterized POST requests
 
     > curl -d "path=/test&method=POST&response_code=200&response_body={param1}*{param2}" 127.0.0.1:8080
     > Success
