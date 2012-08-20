@@ -167,17 +167,11 @@ class Runner(object):
 
         reactor.run()
 
-    def stop(self):
-        reactor.run()
-
 
 def main(num_nodes=None):
-    try:
-        runner = Runner(num_nodes)
-        runner.start_mock_cluster()
-        runner.start_smart_server()
-    except KeyboardInterrupt:
-        runner.stop()
+    runner = Runner(num_nodes)
+    runner.start_mock_cluster()
+    runner.start_smart_server()
 
 
 if __name__ == "__main__":
