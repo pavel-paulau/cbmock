@@ -23,7 +23,7 @@ from lettuce import step, world, before, after
 from nose.tools import assert_equals
 import requests
 
-from mock import main
+from cbmock import main
 
 
 def get_url(path, port=None):

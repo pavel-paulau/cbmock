@@ -14,7 +14,7 @@ Example
 
 First of all start mock server
 
-    > ./mock.py
+    > ./cbmock.py
 
 Train server to handle GET requests
 
@@ -37,7 +37,7 @@ Train server to handle parameterized POST requests
 
 You can start mock cluster as well:
 
-    > ./mock.py --nodes=4
+    > ./cbmock.py --nodes=4
 
     > curl -d "path=/test&method=GET&response_code=200&response_body=2*2" 127.0.0.1:8080
     > Success
