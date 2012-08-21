@@ -154,7 +154,7 @@ class Runner(object):
 
     def start_mock_cluster(self):
         """Start multi-node mock cluster"""
-        for port in range(9001, 9001 + self.num_nodes):
+        for port in range(9000, 9000 + self.num_nodes):
             mock_server = MockServer(port=port)
             factory = Site(mock_server)
             reactor.listenTCP(port, factory)
