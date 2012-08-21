@@ -154,7 +154,12 @@ class Runner(object):
 
     def start_mock_cluster(self):
         """Start multi-node mock cluster"""
-        for port in range(9000, 9000 + self.num_nodes):
+        for port in range(9000, 9000 + self.num_nodes):  # Administration port
+            mock_server = MockServer(port=port)
+            factory = Site(mock_server)
+            reactor.listenTCP(port, factory)
+
+        for port in range(9500, 9500 + self.num_nodes):  # Couchbase API port
             mock_server = MockServer(port=port)
             factory = Site(mock_server)
             reactor.listenTCP(port, factory)
