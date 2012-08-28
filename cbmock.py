@@ -17,17 +17,21 @@
 #
 
 from collections import defaultdict
+from optparse import OptionParser
 import logging
 import logging.config
-from optparse import OptionParser
+
+logging.config.fileConfig('logging.conf')
 
 from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.resource import Resource
 
+from mcmock import MemcachedMockServer
+from mcbackend import DictBackend
 
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger('root')
+
+logger = logging.getLogger()
 
 
 class HttpResponse(object):
@@ -74,16 +78,16 @@ class HttpResponse(object):
         return eval(raw_response)
 
 
-class MockServer(Resource):
+class HttpMockServer(Resource):
     isLeaf = True
     dispatcher = defaultdict(dict)
 
     def __init__(self, port):
         self.port = port
-        logger.info('Started mock server on port {0}'.format(self.port))
+        logger.info('Started HTTP server on port {0}'.format(self.port))
 
     def __del__(self):
-        logger.info('Stopped mock server on port {0}'.format(self.port))
+        logger.info('Stopped HTTP server on port {0}'.format(self.port))
 
     def render_GET(self, request):
         return self.handle_request('GET', request)
@@ -96,7 +100,7 @@ class MockServer(Resource):
 
     def handle_request(self, method, request):
         try:
-            raw_data = MockServer.dispatcher[method][request.path]
+            raw_data = HttpMockServer.dispatcher[method][request.path]
         except KeyError, key:
             request.setResponseCode(404)
             response = 'Not found: {0}'.format(key)
@@ -121,7 +125,7 @@ class SmartServer(Resource):
         try:
             method = request.args['method'][0]
             path = request.args['path'][0]
-            MockServer.dispatcher[method][path] = {
+            HttpMockServer.dispatcher[method][path] = {
                 'response_code': int(request.args['response_code'][0]),
                 'response_body': request.args['response_body'][0]
             }
@@ -155,14 +159,19 @@ class Runner(object):
     def start_mock_cluster(self):
         """Start multi-node mock cluster"""
         for port in range(9000, 9000 + self.num_nodes):  # Administration port
-            mock_server = MockServer(port=port)
+            mock_server = HttpMockServer(port=port)
             factory = Site(mock_server)
             reactor.listenTCP(port, factory)
 
         for port in range(9500, 9500 + self.num_nodes):  # Couchbase API port
-            mock_server = MockServer(port=port)
+            mock_server = HttpMockServer(port=port)
             factory = Site(mock_server)
             reactor.listenTCP(port, factory)
+
+        backend = DictBackend()
+        for port in range(12000, 12000 + self.num_nodes):
+            reactor.listenTCP(port, MemcachedMockServer(port=port,
+                                                        backend=backend))
 
     def start_smart_server(self):
         """Start common smart server"""
@@ -170,13 +179,13 @@ class Runner(object):
         factory = Site(smart_server)
         reactor.listenTCP(8080, factory)
 
-        reactor.run()
-
 
 def main(num_nodes=None):
     runner = Runner(num_nodes)
     runner.start_mock_cluster()
     runner.start_smart_server()
+
+    reactor.run()
 
 
 if __name__ == "__main__":
