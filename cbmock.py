@@ -31,7 +31,7 @@ from httpmock import HttpMockServer
 from smartserver import SmartServer
 
 
-class Runner(object):
+class CbMock(object):
 
     def __init__(self, num_nodes):
         if num_nodes:
@@ -75,9 +75,9 @@ class Runner(object):
 
 
 def main(num_nodes=None):
-    runner = Runner(num_nodes)
-    runner.start_mock_cluster()
-    runner.start_smart_server()
+    cbmock = CbMock(num_nodes)
+    cbmock.start_mock_cluster()
+    cbmock.start_smart_server()
 
     reactor.run()
 
