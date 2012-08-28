@@ -24,39 +24,11 @@ logging.config.fileConfig('logging.conf')
 
 from twisted.internet import reactor
 from twisted.web.server import Site
-from twisted.web.resource import Resource
 
 from mcmock import MemcachedMockServer
 from mcbackend import DictBackend
 from httpmock import HttpMockServer
-
-
-logger = logging.getLogger()
-
-
-class SmartServer(Resource):
-    isLeaf = True
-
-    def __init__(self):
-        logger.info('Started smart server on port 8080')
-
-    def __del__(self):
-        logger.info('Stopped smart server on port 8080')
-
-    def render_POST(self, request):
-        try:
-            method = request.args['method'][0]
-            path = request.args['path'][0]
-            HttpMockServer.dispatcher[method][path] = {
-                'response_code': int(request.args['response_code'][0]),
-                'response_body': request.args['response_body'][0]
-            }
-            response = 'Success'
-        except KeyError, key:
-            response = 'Missing key: {0}'.format(key)
-            logger.error(response)
-        finally:
-            return response
+from smartserver import SmartServer
 
 
 class Runner(object):
