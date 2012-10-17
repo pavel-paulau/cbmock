@@ -9,6 +9,8 @@ Dependencies
 
     pip install twisted
 
+    pip install cbtestlib
+
 Example
 -------
 
