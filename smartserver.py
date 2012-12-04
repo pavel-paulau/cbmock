@@ -41,8 +41,16 @@ class SmartServer(Resource):
         response = None
         try:
             method = request.args['method'][0]
-            path = request.args['path'][0]
+        except KeyError:
+            log.warn('Missing "method" parameter, will use GET by default')
+            method = 'GET'
+        try:
             code = int(request.args['response_code'][0])
+        except KeyError:
+            log.warn('Missing "response_code" parameter, will use 200 by default')
+            code = 200
+        try:
+            path = request.args['path'][0]
             body = request.args['response_body'][0]
         except KeyError, key:
             response = 'Missing key: {0}'.format(key)
