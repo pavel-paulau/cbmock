@@ -15,14 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from collections import defaultdict
 import logging
+import logging.config
 
 from twisted.web.resource import Resource
 
 
-logger = logging.getLogger()
+logging.config.fileConfig('logging.conf')
+log = logging.getLogger()
 
 
 class HttpResponse(object):
@@ -40,17 +41,17 @@ class HttpResponse(object):
         except KeyError:
             self.status_code = 404
             self.response = 'HTTP status code is not defined'
-            logger.error(self.response)
+            log.error(self.response)
         try:
             self.response = self.eval_response_body(request, raw_data)
         except KeyError:
             self.status_code = 404
             self.response = 'Response body is not defined'
-            logger.error(self.response)
+            log.error(self.response)
         except Exception as error:
             request.setResponseCode(500)
             self.response = 'Cannot evaluate response body'
-            logger.error('{0}: {1}'.format(self.response, error))
+            log.error('{0}: {1}'.format(self.response, error))
 
     def __str__(self):
         return str(self.response)
@@ -75,10 +76,10 @@ class HttpMockServer(Resource):
 
     def __init__(self, port):
         self.port = port
-        logger.info('Started HTTP server on port {0}'.format(self.port))
+        log.info('Started HTTP server on port {0}'.format(self.port))
 
     def __del__(self):
-        logger.info('Stopped HTTP server on port {0}'.format(self.port))
+        log.info('Stopped HTTP server on port {0}'.format(self.port))
 
     def render_GET(self, request):
         return self.handle_request('GET', request)
@@ -95,7 +96,7 @@ class HttpMockServer(Resource):
         except KeyError, key:
             request.setResponseCode(404)
             response = 'Not found: {0}'.format(key)
-            logger.error(response)
+            log.error(response)
         else:
             response = HttpResponse(request, raw_data)
             request.setResponseCode(response.status_code)

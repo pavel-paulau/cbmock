@@ -15,12 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from optparse import OptionParser
-import logging
-import logging.config
-
-logging.config.fileConfig('logging.conf')
 
 from twisted.internet import reactor
 from twisted.web.server import Site

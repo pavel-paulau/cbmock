@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 import random
 import string
 import struct
@@ -23,11 +22,15 @@ import time
 import hmac
 import heapq
 import logging
+import logging.config
 
 from cbtestlib import memcacheConstants
 from cbtestlib.memcacheConstants import EXTRA_HDR_FMTS
 
-logger = logging.getLogger()
+
+logging.config.fileConfig('logging.conf')
+log = logging.getLogger()
+
 
 VERSION = "1.0"
 
@@ -89,7 +92,7 @@ class BaseBackend(object):
 
         now = time.time()
         while self.sched and self.sched[0][0] <= now:
-            logger.debug("Running delayed job.")
+            log.debug("Running delayed job.")
             heapq.heappop(self.sched)[1]()
 
         hdrs, key, val = self._splitKeys(EXTRA_HDR_FMTS.get(cmd, ''),
@@ -100,7 +103,7 @@ class BaseBackend(object):
 
     def handle_noop(self, cmd, hdrs, key, cas, data):
         """Handle a noop"""
-        logger.debug("Noop")
+        log.debug("Noop")
         return 0, 0, ''
 
     def handle_unknown(self, cmd, hdrs, key, cas, data):
@@ -124,11 +127,11 @@ class DictBackend(BaseBackend):
         if rv:
             now = time.time()
             if now >= rv[1]:
-                logger.debug(key + "expired")
+                log.debug(key + "expired")
                 del self.storage[key]
                 rv = None
         else:
-            logger.debug("Miss looking up {0}".format(key))
+            log.debug("Miss looking up {0}".format(key))
         return rv
 
     def handle_get(self, cmd, hdrs, key, cas, data):
@@ -141,7 +144,7 @@ class DictBackend(BaseBackend):
         return rv
 
     def handle_set(self, cmd, hdrs, key, cas, data):
-        logger.debug("Handling a set with {0}".format(hdrs))
+        log.debug("Handling a set with {0}".format(hdrs))
         val = self.__lookup(key)
         exp, flags = hdrs
 
@@ -152,7 +155,7 @@ class DictBackend(BaseBackend):
     def handle_getq(self, cmd, hdrs, key, cas, data):
         rv = self.handle_get(cmd, hdrs, key, cas, data)
         if rv[0] == memcacheConstants.ERR_NOT_FOUND:
-            logger.debug("Swallowing miss")
+            log.debug("Swallowing miss")
             rv = None
         return rv
 
@@ -162,7 +165,7 @@ class DictBackend(BaseBackend):
         if not exp:
             exp = float(2 ** 31)
         self.storage[key] = (hdrs[0], time.time() + exp, data)
-        logger.debug("Stored {0} in {1}".format(self.storage[key], key))
+        log.debug("Stored {0} in {1}".format(self.storage[key], key))
         if key in self.held_keys:
             del self.held_keys[key]
         return 0, id(self.storage[key]), ''
@@ -171,7 +174,7 @@ class DictBackend(BaseBackend):
         amount, initial, expiration = hdrs
         rv = self._error(memcacheConstants.ERR_NOT_FOUND, 'Not found')
         val = self.storage.get(key)
-        logger.debug(
+        log.debug(
             "Mutating {0}, hdrs={1}, val={2} {3}".format(key,
                                                          repr(hdrs),
                                                          repr(val),
@@ -191,7 +194,7 @@ class DictBackend(BaseBackend):
         if not rv[0]:
             rv = rv[0], rv[1], struct.pack(
                 memcacheConstants.INCRDECR_RES_FMT, long(rv[2]))
-        logger.debug("Returning".format(rv))
+        log.debug("Returning".format(rv))
         return rv
 
     def handle_incr(self, cmd, hdrs, key, cas, data):
@@ -203,7 +206,7 @@ class DictBackend(BaseBackend):
     def __has_hold(self, key):
         rv = False
         now = time.time()
-        logger.debug(
+        log.debug(
             "Looking for hold of {0} in {1} as of {2}".format(key,
                                                               self.held_keys,
                                                               now))
@@ -232,7 +235,7 @@ class DictBackend(BaseBackend):
         def f():
             self.storage.clear()
             self.held_keys.clear()
-            logger.debug("Flushed")
+            log.debug("Flushed")
         if timebomb_delay:
             heapq.heappush(self.sched, (time.time() + timebomb_delay, f))
         else:
@@ -245,7 +248,7 @@ class DictBackend(BaseBackend):
             if val:
                 del self.storage[key]
                 rv = 0, 0, ''
-            logger.debug("Deleted {0} {1}".format(key, hdrs[0]))
+            log.debug("Deleted {0} {1}".format(key, hdrs[0]))
             if hdrs[0] > 0:
                 self.held_keys[key] = time.time() + hdrs[0]
             return rv
@@ -286,25 +289,25 @@ class DictBackend(BaseBackend):
         expected = hmac.HMAC('testpass', self.challenge).hexdigest()
 
         if u == 'testuser' and resp == expected:
-            logger.debug("Successful CRAM-MD5 auth.")
+            log.debug("Successful CRAM-MD5 auth.")
             return 0, 0, 'OK'
         else:
-            logger.debug("Errored a CRAM-MD5 auth.")
+            log.debug("Errored a CRAM-MD5 auth.")
             return self._error(memcacheConstants.ERR_AUTH, 'Auth error.')
 
     def _handle_sasl_auth_plain(self, data):
         foruser, user, passwd = data.split("\0")
         if user == 'testuser' and passwd == 'testpass':
-            logger.debug("Successful plain auth")
+            log.debug("Successful plain auth")
             return 0, 0, "OK"
         else:
-            logger.debug("Bad username/password:  {0}/{1}".format(user,
+            log.debug("Bad username/password:  {0}/{1}".format(user,
                                                                   passwd))
             return self._error(memcacheConstants.ERR_AUTH, 'Auth error.')
 
     def _handle_sasl_auth_cram_md5(self, data):
         assert data == ''
-        logger.debug(
+        log.debug(
             "Issuing {0} as a CRAM-MD5 challenge.".format(self.challenge))
         return memcacheConstants.ERR_AUTH_CONTINUE, 0, self.challenge
 
@@ -316,5 +319,5 @@ class DictBackend(BaseBackend):
         elif mech == 'CRAM-MD5':
             return self._handle_sasl_auth_cram_md5(data)
         else:
-            logger.debug("Unhandled auth type:  {0}".format(mech))
+            log.debug("Unhandled auth type:  {0}".format(mech))
             return self._error(memcacheConstants.ERR_AUTH, 'Auth error.')

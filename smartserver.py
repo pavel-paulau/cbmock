@@ -17,23 +17,25 @@
 #
 
 import logging
+import logging.config
 
 from twisted.web.resource import Resource
 
 from httpmock import HttpMockServer
 
 
-logger = logging.getLogger()
+logging.config.fileConfig('logging.conf')
+log = logging.getLogger()
 
 
 class SmartServer(Resource):
     isLeaf = True
 
     def __init__(self):
-        logger.info('Started smart server on port 8080')
+        log.info('Started smart server on port 8080')
 
     def __del__(self):
-        logger.info('Stopped smart server on port 8080')
+        log.info('Stopped smart server on port 8080')
 
     def render_POST(self, request):
         try:
@@ -46,6 +48,6 @@ class SmartServer(Resource):
             response = 'Success'
         except KeyError, key:
             response = 'Missing key: {0}'.format(key)
-            logger.error(response)
+            log.error(response)
         finally:
             return response

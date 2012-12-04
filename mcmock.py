@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 import struct
 import logging
+import logging.config
 
 from twisted.internet import protocol
 
@@ -26,7 +26,8 @@ from cbtestlib.memcacheConstants import MIN_RECV_PACKET, REQ_PKT_FMT, \
     RES_PKT_FMT, REQ_MAGIC_BYTE, RES_MAGIC_BYTE, EXTRA_HDR_SIZES
 
 
-logger = logging.getLogger()
+logging.config.fileConfig('logging.conf')
+log = logging.getLogger()
 
 
 class RecvHandler(protocol.Protocol):
@@ -59,7 +60,7 @@ class RecvHandler(protocol.Protocol):
             try:
                 status, cas, response = cmdVal
             except ValueError:
-                print "Got", cmdVal
+                log.error("Got %s", cmdVal)
                 raise
             dtype = 0
             extralen = memcacheConstants.EXTRA_HDR_SIZES.get(cmd, 0)
@@ -76,10 +77,10 @@ class MemcachedMockServer(protocol.Factory):
     def __init__(self, port, backend):
         self.port = port
         self.backend = backend
-        logger.info('Started Memcached server on port {0}'. format(self.port))
+        log.info('Started Memcached server on port {0}'. format(self.port))
 
     def __del__(self):
-        logger.info('Stopped Memcached server on port {0}'.format(self.port))
+        log.info('Stopped Memcached server on port {0}'.format(self.port))
 
     def buildProtocol(self, addr):
         return RecvHandler(self)
