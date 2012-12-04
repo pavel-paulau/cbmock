@@ -301,8 +301,7 @@ class DictBackend(BaseBackend):
             log.debug("Successful plain auth")
             return 0, 0, "OK"
         else:
-            log.debug("Bad username/password:  {0}/{1}".format(user,
-                                                                  passwd))
+            log.debug("Bad username/password:  {0}/{1}".format(user, passwd))
             return self._error(memcacheConstants.ERR_AUTH, 'Auth error.')
 
     def _handle_sasl_auth_cram_md5(self, data):
