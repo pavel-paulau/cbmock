@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 from collections import defaultdict
+import json
 import logging
 import logging.config
 
@@ -43,7 +44,8 @@ class HttpResponse(object):
             self.response = 'HTTP status code is not defined'
             log.error(self.response)
         try:
-            self.response = self.eval_response_body(request, raw_data)
+            response = self.eval_response_body(request, raw_data)
+            self.response = json.dumps(response)
         except KeyError:
             self.status_code = 404
             self.response = 'Response body is not defined'
