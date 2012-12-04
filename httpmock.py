@@ -91,6 +91,7 @@ class HttpMockServer(Resource):
         return self.handle_request('PUT', request)
 
     def handle_request(self, method, request):
+        log.debug("Got request: %s", request.path)
         response = None
         try:
             raw_data = HttpMockServer.dispatcher[method][request.path]
@@ -104,4 +105,5 @@ class HttpMockServer(Resource):
             response = HttpResponse(request, raw_data)
             request.setResponseCode(response.status_code)
         finally:
+            log.debug("Sent response: %s", response)
             return str(response)
