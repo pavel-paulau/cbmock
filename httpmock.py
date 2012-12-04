@@ -91,12 +91,15 @@ class HttpMockServer(Resource):
         return self.handle_request('PUT', request)
 
     def handle_request(self, method, request):
+        response = None
         try:
             raw_data = HttpMockServer.dispatcher[method][request.path]
         except KeyError, key:
             request.setResponseCode(404)
             response = 'Not found: {0}'.format(key)
             log.error(response)
+        except Exception, err:
+            log.error(err)
         else:
             response = HttpResponse(request, raw_data)
             request.setResponseCode(response.status_code)

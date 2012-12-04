@@ -38,16 +38,19 @@ class SmartServer(Resource):
         log.info('Stopped smart server on port 8080')
 
     def render_POST(self, request):
+        response = None
         try:
             method = request.args['method'][0]
             path = request.args['path'][0]
-            HttpMockServer.dispatcher[method][path] = {
-                'response_code': int(request.args['response_code'][0]),
-                'response_body': request.args['response_body'][0]
-            }
-            response = 'Success'
+            code = int(request.args['response_code'][0])
+            body = request.args['response_body'][0]
         except KeyError, key:
             response = 'Missing key: {0}'.format(key)
             log.error(response)
+        else:
+            HttpMockServer.dispatcher[method][path] = {
+                'response_code': code, 'response_body': body
+            }
+            response = 'Success'
         finally:
             return response
