@@ -45,6 +45,17 @@ class CbMock(object):
         options, args = parser.parse_args()
         self.num_nodes = options.nodes
 
+    def start_mock_server(self):
+        """Start single-node mock server"""
+        for port in (8091, 8092):  # Administration port
+            mock_server = HttpMockServer(port=port)
+            factory = Site(mock_server)
+            reactor.listenTCP(port, factory)
+
+        backend = DictBackend()
+        memcached_server = MemcachedMockServer(port=11210, backend=backend)
+        reactor.listenTCP(11210, memcached_server)
+
     def start_mock_cluster(self):
         """Start multi-node mock cluster"""
         for port in range(9000, 9000 + self.num_nodes):  # Administration port
@@ -59,8 +70,8 @@ class CbMock(object):
 
         backend = DictBackend()
         for port in range(12000, 12000 + self.num_nodes):
-            reactor.listenTCP(port, MemcachedMockServer(port=port,
-                                                        backend=backend))
+            memcached_server = MemcachedMockServer(port=port, backend=backend)
+            reactor.listenTCP(port, memcached_server)
 
     def start_smart_server(self):
         """Start common smart server"""
@@ -71,7 +82,10 @@ class CbMock(object):
 
 def main(num_nodes=None):
     cbmock = CbMock(num_nodes)
-    cbmock.start_mock_cluster()
+    if cbmock.num_nodes == 1:
+        cbmock.start_mock_server()
+    else:
+        cbmock.start_mock_cluster()
     cbmock.start_smart_server()
 
     reactor.run()
