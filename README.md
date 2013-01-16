@@ -4,8 +4,13 @@ Prerequisites
 * Python 2.6
 * pip
 
-Dependencies
+Installation
 ------------
+
+    pip install cbmock
+
+Source code dependencies
+------------------------
 
     pip install twisted cbtestlib
 
@@ -14,7 +19,11 @@ Example
 
 First of all start mock server
 
-    > ./cbmock.py
+    > cbmock
+
+or
+
+    > ./cbmock/cbmock.py
 
 Train server to handle GET requests
 
@@ -37,7 +46,7 @@ Train server to handle parameterized POST requests
 
 You can start mock cluster as well:
 
-    > ./cbmock.py --nodes=4
+    > cbmock --nodes=4
 
     > curl -d "path=/test&method=GET&response_code=200&response_body=2*2" 127.0.0.1:8080
     > Success
