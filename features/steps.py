@@ -20,7 +20,7 @@ def get_url(path, port=None):
 @before.all
 def read_config():
     world.config = ConfigParser()
-    world.config.readfp(open('test.cfg'))
+    world.config.readfp(open('features/test.cfg'))
 
 
 @before.all
