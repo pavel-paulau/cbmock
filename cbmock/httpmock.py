@@ -27,8 +27,7 @@ class HttpResponse(object):
             self.response = 'HTTP status code is not defined'
             log.error(self.response)
         try:
-            response = self.eval_response_body(request, raw_data)
-            self.response = json.dumps(response)
+            self._eval_response_body(request, raw_data)
         except KeyError:
             self.status_code = 404
             self.response = 'Response body is not defined'
@@ -39,20 +38,26 @@ class HttpResponse(object):
             log.error('{0}: {1}'.format(self.response, error))
 
     def __str__(self):
-        return str(self.response)
+        return json.dumps(self.response)
 
     def get_request_params(self, request):
         """Generate normal dictionary with request parameters"""
         return dict((str(k), str(v[0])) for (k, v) in request.args.iteritems())
 
-    def eval_response_body(self, request, raw_data):
+    def _eval_response_body(self, request, raw_data):
         """Replace optional request parameters in raw response body with their
         values and evaluate final response body.
         """
         raw_response = raw_data['response_body']
         for param, value in self.get_request_params(request).iteritems():
             raw_response = raw_response.replace(param, value)
-        return eval(raw_response)
+        try:
+            self.response = json.loads(raw_response)
+        except ValueError:
+            try:
+                self.response = eval(raw_response)
+            except NameError:
+                self.response = raw_response
 
 
 class HttpMockServer(Resource):
