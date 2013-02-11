@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='cbmock',
-    version='0.1',
+    version='0.2.2',
     description='Couchbase mock server',
     author='Pavel Paulau',
     author_email='pavel.paulau@gmail.com',
