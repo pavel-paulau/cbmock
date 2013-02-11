@@ -60,7 +60,7 @@ class CbMock(object):
 
     def start_smart_server(self):
         """Start common smart server"""
-        smart_server = SmartServer(self.num_nodes)
+        smart_server = SmartServer()
         factory = Site(smart_server)
         reactor.listenTCP(8080, factory)
 

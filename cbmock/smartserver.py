@@ -1,4 +1,3 @@
-import json
 import logging
 import logging.config
 
@@ -14,9 +13,7 @@ log = logging.getLogger()
 class SmartServer(Resource):
     isLeaf = True
 
-    def __init__(self, num_nodes):
-        self.num_nodes = num_nodes
-        self.training()
+    def __init__(self):
         log.info('Started smart server on port 8080')
 
     def __del__(self):
@@ -47,16 +44,3 @@ class SmartServer(Resource):
             response = 'Success'
         finally:
             return response
-
-    def training(self):
-        self.pools_default()
-
-    def pools_default(self):
-        nodes = [{"couchApiBase": "http://127.0.0.1:{0}/".format(9500 + node)}
-                 for node in xrange(self.num_nodes)]
-
-        response = {"nodes": nodes}
-
-        HttpMockServer.dispatcher["GET"]["/pools/default"] = {
-            "response_code": 200, "response_body": json.dumps(response)
-        }
