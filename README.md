@@ -30,7 +30,7 @@ Train server to handle GET requests
     > curl 127.0.0.1:8091/test
     > Not found: '/test'
 
-    > curl -d "path=/test&method=GET&response_code=200&response_body=2*2" 127.0.0.1:8080
+    > curl -F "path=/test" -F "method=GET" -F "response_code=200" -F "response_body=2*2" 127.0.0.1:8080
     > Success
 
     > curl 127.0.0.1:8091/test
@@ -38,17 +38,17 @@ Train server to handle GET requests
 
 Train server to handle parameterized POST requests
 
-    > curl -d "path=/test&method=POST&response_code=200&response_body={param1}*{param2}" 127.0.0.1:8080
+    > curl -F "path=/test" -F "method=POST" -F "response_code=200" -F "response_body={param1}*{param2}" 127.0.0.1:8080
     > Success
 
-    > curl -d "{param1}=2&{param2}=2" 127.0.0.1:8091/test
+    > curl -F "{param1}=2" -F "{param2}=2" 127.0.0.1:8091/test
     > 4
 
 You can start mock cluster as well:
 
     > cbmock --nodes=4
 
-    > curl -d "path=/test&method=GET&response_code=200&response_body=2*2" 127.0.0.1:8080
+    > curl -F "path=/test" -F "method=GET" -F "response_code=200" -F "response_body=2*2" 127.0.0.1:8080
     > Success
 
     > curl 127.0.0.1:9000/test
@@ -56,6 +56,10 @@ You can start mock cluster as well:
 
     > curl 127.0.0.1:9003/test
     > 4
+
+Also you can use sample files as parameters:
+
+    curl -F "path=/pools/default" -F "method=GET" -F "response_code=200" -F "response_body=@pools_default.json" 127.0.0.1:8080
 
 Testing
 -------
