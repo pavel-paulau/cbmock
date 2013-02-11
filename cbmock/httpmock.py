@@ -1,4 +1,5 @@
 from collections import defaultdict
+import os
 import json
 import logging
 import logging.config
@@ -6,7 +7,8 @@ import logging.config
 from twisted.web.resource import Resource
 
 
-logging.config.fileConfig('logging.conf')
+config_file = os.path.join(os.path.dirname(__file__), "logging.conf")
+logging.config.fileConfig(config_file)
 log = logging.getLogger()
 
 

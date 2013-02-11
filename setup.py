@@ -7,6 +7,7 @@ setup(
     author='Pavel Paulau',
     author_email='pavel.paulau@gmail.com',
     packages=["cbmock"],
+    include_package_data=True,
     entry_points={
         'console_scripts': ['cbmock = cbmock.cbmock:main']
     },

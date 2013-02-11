@@ -1,3 +1,4 @@
+import os
 import random
 import string
 import struct
@@ -11,7 +12,8 @@ from cbtestlib import memcacheConstants
 from cbtestlib.memcacheConstants import EXTRA_HDR_FMTS
 
 
-logging.config.fileConfig('logging.conf')
+config_file = os.path.join(os.path.dirname(__file__), "logging.conf")
+logging.config.fileConfig(config_file)
 log = logging.getLogger()
 
 

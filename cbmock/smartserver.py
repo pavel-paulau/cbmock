@@ -1,3 +1,4 @@
+import os
 import logging
 import logging.config
 
@@ -6,7 +7,8 @@ from twisted.web.resource import Resource
 from httpmock import HttpMockServer
 
 
-logging.config.fileConfig('logging.conf')
+config_file = os.path.join(os.path.dirname(__file__), "logging.conf")
+logging.config.fileConfig(config_file)
 log = logging.getLogger()
 
 

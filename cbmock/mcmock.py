@@ -1,3 +1,4 @@
+import os
 import struct
 import logging
 import logging.config
@@ -8,8 +9,8 @@ from cbtestlib import memcacheConstants
 from cbtestlib.memcacheConstants import MIN_RECV_PACKET, REQ_PKT_FMT, \
     RES_PKT_FMT, REQ_MAGIC_BYTE, RES_MAGIC_BYTE, EXTRA_HDR_SIZES
 
-
-logging.config.fileConfig('logging.conf')
+config_file = os.path.join(os.path.dirname(__file__), "logging.conf")
+logging.config.fileConfig(config_file)
 log = logging.getLogger()
 
 
