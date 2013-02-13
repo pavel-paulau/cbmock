@@ -30,6 +30,12 @@ class CbMock(object):
         options, args = parser.parse_args()
         self.num_nodes = options.nodes
 
+    def start_seriesly_server(self):
+        """"Start seriesly mock server"""
+        seriesly_server = HttpMockServer(port=3133)
+        factory = Site(seriesly_server)
+        reactor.listenTCP(3133, factory)
+
     def start_mock_server(self):
         """Start single-node mock server"""
         for port in (8091, 8092):  # Administration port
@@ -71,6 +77,7 @@ def main(num_nodes=None):
         cbmock.start_mock_server()
     else:
         cbmock.start_mock_cluster()
+    cbmock.start_seriesly_server()
     cbmock.start_smart_server()
 
     reactor.run()
